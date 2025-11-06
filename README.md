@@ -87,7 +87,7 @@ const uniqueTokens = await tokenService.generateTokenBatch({
 ### Token Validation
 
 ```typescript
-import { validateToken } from 'essayagent-tokensys';
+import { validateToken } from 'earlyaccess-tokensys';
 
 const result = await validateToken('BETA2025');
 if (result.valid) {
@@ -100,7 +100,7 @@ if (result.valid) {
 ### Token Generation
 
 ```typescript
-import { generateToken } from 'essayagent-tokensys';
+import { generateToken } from 'earlyaccess-tokensys';
 
 const token = await generateToken();
 console.log('Generated token:', token.code); // "EA-X9Y8Z7W6-0001"
@@ -109,7 +109,7 @@ console.log('Generated token:', token.code); // "EA-X9Y8Z7W6-0001"
 ### React Component Integration
 
 ```tsx
-import { TokenInput } from 'essayagent-tokensys';
+import { TokenInput } from 'earlyaccess-tokensys';
 
 function SignupForm() {
   return (
