@@ -152,7 +152,7 @@ export const nextJsApiRouteExample = `
 // app/api/early-access/validate/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { createValidationHandler } from 'essayagent-tokensys';
+import { createValidationHandler } from 'earlyaccess-tokensys';
 
 export async function POST(request: Request) {
   const cookieStore = cookies();
@@ -180,7 +180,7 @@ export async function POST(request: Request) {
 export const expressMiddlewareExample = `
 // server.js
 const express = require('express');
-const { createValidationHandler } = require('essayagent-tokensys');
+const { createValidationHandler } = require('earlyaccess-tokensys');
 
 const app = express();
 app.use(express.json());

@@ -34,7 +34,7 @@ export const validateRoute = `
 // essayagent_webapp/src/app/api/early-access/validate/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { createValidationHandler } from 'essayagent-tokensys';
+import { createValidationHandler } from 'earlyaccess-tokensys';
 
 export async function POST(request: Request) {
   try {
@@ -73,7 +73,7 @@ export const generateRoute = `
 // essayagent_webapp/src/app/api/early-access/generate/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { createTokenService } from 'essayagent-tokensys';
+import { createTokenService } from 'earlyaccess-tokensys';
 
 export async function POST(request: Request) {
   try {
@@ -120,7 +120,7 @@ export const tokensRoute = `
 // essayagent_webapp/src/app/api/early-access/tokens/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { createTokenService } from 'essayagent-tokensys';
+import { createTokenService } from 'earlyaccess-tokensys';
 
 export async function GET(request: Request) {
   try {
@@ -174,8 +174,8 @@ export const signupComponent = `
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { TokenInput } from 'essayagent-tokensys';
-import { EarlyAccessToken } from 'essayagent-tokensys';
+import { TokenInput } from 'earlyaccess-tokensys';
+import { EarlyAccessToken } from 'earlyaccess-tokensys';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -312,7 +312,7 @@ export const adminDashboard = `
 // essayagent_webapp/src/app/admin/early-access/page.tsx
 'use client';
 
-import { TokenAdmin } from 'essayagent-tokensys';
+import { TokenAdmin } from 'earlyaccess-tokensys';
 
 export default function EarlyAccessAdminPage() {
   return (

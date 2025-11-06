@@ -3,7 +3,7 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { createValidationHandler } from 'essayagent-tokensys';
+import { createValidationHandler } from 'earlyaccess-tokensys';
 
 export async function POST(request: Request) {
   try {
