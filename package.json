@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "keywords": ["early-access", "tokens", "authentication"],
-  "author": "Open Source",
+  "author": "William James",
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
