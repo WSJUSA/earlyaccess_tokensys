@@ -121,6 +121,24 @@ function SignupForm() {
 }
 ```
 
+### Admin Component Integration
+
+```tsx
+import { TokenAdmin } from 'earlyaccess-tokensys';
+
+function AdminDashboard() {
+  return (
+    <div>
+      <h1>Token Management</h1>
+      <TokenAdmin
+        supabaseUrl="/api/early-access"
+        onError={(error) => console.error('Admin error:', error)}
+      />
+    </div>
+  );
+}
+```
+
 ## API Endpoints
 
 ### Validate Token
@@ -176,7 +194,7 @@ npm run type-check
 - ✅ **Secure Token Generation**: Collision-resistant generation with uniqueness checks
 - ✅ **Database-Backed**: Full audit trail with Supabase and RLS policies
 - ✅ **Rate Limiting**: Built-in protection against abuse
-- ✅ **Admin Dashboard**: Complete token management interface
+- ✅ **Admin Component**: React component for token management interfaces
 - ✅ **React Components**: Ready-to-use UI components
 - ✅ **TypeScript**: Full type safety and IntelliSense
 - ✅ **Modular Architecture**: Easy to extend and customize
@@ -185,7 +203,7 @@ npm run type-check
 
 - **Modular Design**: Standalone module that can be easily integrated
 - **Database First**: All token state managed in Supabase
-- **Security Focused**: Server-side validation, rate limiting, CSRF protection
+- **Security Focused**: Server-side validation, rate limiting, RLS policies
 - **Scalable**: Built to handle thousands of tokens and users
 
 ## License
