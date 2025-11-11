@@ -46,6 +46,8 @@ export interface BatchTokenGenerationOptions extends TokenGenerationOptions {
   shared_code?: boolean; // If true, generates shared codes instead of unique codes
   max_redemptions?: number; // How many users can use each shared code
   simple_format?: boolean; // If true, uses simple format like BETA2025 instead of EA-XXXX-XXXX
+  // Vanity naming options
+  custom_prefix?: string; // Custom prefix for vanity tokens (e.g., "VIP", "ESSAY", "BETA")
 }
 
 export interface SharedTokenGenerationOptions extends TokenGenerationOptions {

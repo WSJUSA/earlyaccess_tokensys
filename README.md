@@ -5,6 +5,7 @@ A modular early access token system for TypeScript web applications. This system
 ## Features
 
 - **Secure Token Generation**: Cryptographically secure token generation with collision resistance
+- **Vanity Token Naming**: Custom prefixes for branded, memorable token codes
 - **Database-Backed**: Full audit trail of token creation, distribution, and redemption
 - **Admin Management**: Simple interface for token generation and management
 - **Supabase Integration**: Seamless integration with existing Supabase authentication
@@ -57,6 +58,11 @@ CREATE INDEX idx_early_access_tokens_redeemed_by ON early_access_tokens(redeemed
 - **Usage**: Multiple users can redeem the same code
 - **Use case**: Group access, classroom sharing, viral distribution
 
+### Vanity Codes (Custom prefixes)
+- **Format**: `VIP1234`, `LAUNCH2025001`, `PARTNER0001` (branded, memorable)
+- **Usage**: Custom prefixes for marketing campaigns, partner programs, or branded access
+- **Use case**: Event promotions, partner programs, VIP access, themed campaigns
+
 ## Usage
 
 ### Generate Shared Codes
@@ -82,6 +88,36 @@ const uniqueTokens = await tokenService.generateTokenBatch({
   max_redemptions: 1, // Each code can only be used once
   simple_format: false // Use complex EA-XXXX-XXXX format
 });
+```
+
+### Generate Vanity Tokens with Custom Prefixes
+
+```typescript
+// Generate branded shared codes with custom prefix
+const vipTokens = await tokenService.generateTokenBatch({
+  count: 5,
+  shared_code: true,
+  max_redemptions: 50, // Each code can be used by 50 people
+  custom_prefix: 'VIP'   // Use "VIP" instead of random prefixes
+});
+// Results in tokens like: VIP1234, VIP5678, VIP9012, etc.
+
+// Generate event-specific codes
+const eventTokens = await tokenService.generateTokenBatch({
+  count: 3,
+  shared_code: true,
+  max_redemptions: 100,
+  custom_prefix: 'LAUNCH2025'
+});
+// Results in tokens like: LAUNCH2025001, LAUNCH2025002, LAUNCH2025003, etc.
+
+// Generate partner codes
+const partnerTokens = await tokenService.generateTokenBatch({
+  count: 2,
+  max_redemptions: 25,
+  custom_prefix: 'PARTNER'
+});
+// Results in tokens like: PARTNER0001, PARTNER0002, etc.
 ```
 
 ### Token Validation
@@ -189,8 +225,9 @@ npm run type-check
 
 ## Features
 
-- ✅ **Flexible Token Types**: Support for both unique codes (1 user) and shared codes (N users)
-- ✅ **Multiple Formats**: Complex format (EA-A1B2C3D4-0001) and simple format (BETA2025)
+- ✅ **Flexible Token Types**: Support for unique codes (1 user), shared codes (N users), and vanity codes
+- ✅ **Multiple Formats**: Complex format (EA-A1B2C3D4-0001), simple format (BETA2025), and custom vanity formats
+- ✅ **Vanity Token Naming**: Custom prefixes for branded, memorable token codes
 - ✅ **Secure Token Generation**: Collision-resistant generation with uniqueness checks
 - ✅ **Database-Backed**: Full audit trail with Supabase and RLS policies
 - ✅ **Rate Limiting**: Built-in protection against abuse

@@ -46,10 +46,14 @@ export class TokenService {
    * Generates multiple tokens in batch
    */
   async generateTokenBatch(options: BatchTokenGenerationOptions): Promise<EarlyAccessToken[]> {
-    const { count, shared_code, max_redemptions, simple_format, start_sequence } = options;
+    const { count, shared_code, max_redemptions, simple_format, start_sequence, custom_prefix } = options;
     const simpleFormat = simple_format || shared_code || (max_redemptions && max_redemptions > 1);
 
-    const tokenCodes = generateTokenBatch(count, { startSequence: start_sequence, simpleFormat });
+    const tokenCodes = generateTokenBatch(count, {
+      startSequence: start_sequence,
+      simpleFormat,
+      customPrefix: custom_prefix
+    });
     const tokens: EarlyAccessToken[] = [];
 
     for (const tokenCode of tokenCodes) {
