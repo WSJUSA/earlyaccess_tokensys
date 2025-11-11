@@ -169,19 +169,20 @@ export class TokenDatabase {
    * Gets analytics data for the token system
    */
   async getAnalytics(): Promise<TokenAnalytics> {
-    const { data, error } = await this.supabase
-      .rpc('get_token_analytics'); // This would need to be created as a database function
+    const { data, error } = await this.supabase.rpc('get_token_analytics');
 
     if (error) {
-      // Fallback to client-side calculation if RPC doesn't exist
+      console.warn('RPC get_token_analytics failed:', error);
+      // Fallback to client-side calculation
       return this.calculateAnalytics();
     }
 
     return data;
   }
 
+
   /**
-   * Client-side analytics calculation (fallback)
+   * Client-side analytics calculation (final fallback)
    */
   private async calculateAnalytics(): Promise<TokenAnalytics> {
     const { data: allTokens, error } = await this.supabase

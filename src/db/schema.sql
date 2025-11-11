@@ -57,6 +57,35 @@ CREATE POLICY "Users can update tokens for redemption" ON early_access_tokens
      (auth.uid() != ALL(redeemed_users)))
   );
 
+-- RPC function for getting token analytics (admin operations)
+CREATE OR REPLACE FUNCTION get_token_analytics()
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'total_created', COUNT(*),
+    'total_redeemed', COALESCE(SUM(current_redemptions), 0),
+    'total_available', COALESCE(SUM(max_redemptions), 0),
+    'total_active', COUNT(*) FILTER (WHERE is_active = true AND current_redemptions < max_redemptions AND (expires_at IS NULL OR expires_at > NOW())),
+    'total_expired', COUNT(*) FILTER (WHERE expires_at IS NOT NULL AND expires_at <= NOW()),
+    'redemption_rate', CASE WHEN COUNT(*) > 0 THEN SUM(current_redemptions)::float / COUNT(*)::float ELSE 0 END,
+    'average_time_to_redemption', (
+      SELECT AVG(EXTRACT(EPOCH FROM (redeemed_at - created_at))/86400)
+      FROM early_access_tokens
+      WHERE redeemed_at IS NOT NULL AND created_at IS NOT NULL
+    )
+  ) INTO result
+  FROM early_access_tokens;
+
+  RETURN result;
+END;
+$$;
+
 -- Comments for documentation
 COMMENT ON TABLE early_access_tokens IS 'Stores early access tokens for controlled beta access - supports both single-use and shared codes';
 COMMENT ON COLUMN early_access_tokens.token_code IS 'Unique token code in format EA-{8-char-hash}-{4-digit-sequence} or simplified shared codes';
