@@ -86,6 +86,51 @@ BEGIN
 END;
 $$;
 
+-- RPC function for querying tokens (admin operations)
+CREATE OR REPLACE FUNCTION query_tokens_admin(
+  status_filter text DEFAULT 'all',
+  limit_count integer DEFAULT 100,
+  offset_count integer DEFAULT 0,
+  created_by_filter uuid DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  result jsonb;
+  query_sql text;
+BEGIN
+  -- Build the base query
+  query_sql := 'SELECT * FROM early_access_tokens WHERE true';
+
+  -- Apply status filtering
+  IF status_filter = 'active' THEN
+    query_sql := query_sql || ' AND is_active = true AND current_redemptions < max_redemptions AND (expires_at IS NULL OR expires_at > NOW())';
+  ELSIF status_filter = 'redeemed' THEN
+    query_sql := query_sql || ' AND current_redemptions >= max_redemptions';
+  ELSIF status_filter = 'expired' THEN
+    query_sql := query_sql || ' AND expires_at IS NOT NULL AND expires_at <= NOW()';
+  ELSIF status_filter = 'inactive' THEN
+    query_sql := query_sql || ' AND is_active = false';
+  END IF;
+
+  -- Apply created_by filtering
+  IF created_by_filter IS NOT NULL THEN
+    query_sql := query_sql || ' AND created_by = ''' || created_by_filter || '''';
+  END IF;
+
+  -- Apply ordering and pagination
+  query_sql := query_sql || ' ORDER BY created_at DESC LIMIT ' || limit_count || ' OFFSET ' || offset_count;
+
+  -- Execute the query
+  EXECUTE 'SELECT jsonb_agg(row_to_json(t)) FROM (' || query_sql || ') t' INTO result;
+
+  RETURN COALESCE(result, '[]'::jsonb);
+END;
+$$;
+
 -- Comments for documentation
 COMMENT ON TABLE early_access_tokens IS 'Stores early access tokens for controlled beta access - supports both single-use and shared codes';
 COMMENT ON COLUMN early_access_tokens.token_code IS 'Unique token code in format EA-{8-char-hash}-{4-digit-sequence} or simplified shared codes';

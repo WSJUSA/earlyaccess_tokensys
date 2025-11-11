@@ -119,6 +119,26 @@ export class TokenDatabase {
    * Queries tokens with filtering options
    */
   async queryTokens(options: TokenQueryOptions = {}): Promise<EarlyAccessToken[]> {
+    const { data, error } = await this.supabase.rpc('query_tokens_admin', {
+      status_filter: options.status || 'all',
+      limit_count: options.limit || 100,
+      offset_count: options.offset || 0,
+      created_by_filter: options.created_by || null
+    });
+
+    if (error) {
+      console.warn('RPC query_tokens_admin failed:', error);
+      // Fallback to client-side calculation for development/debugging
+      return this.queryTokensFallback(options);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * Fallback client-side token querying (for development/debugging)
+   */
+  private async queryTokensFallback(options: TokenQueryOptions = {}): Promise<EarlyAccessToken[]> {
     let query = this.supabase
       .from('early_access_tokens')
       .select('*')
