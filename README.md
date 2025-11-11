@@ -26,25 +26,20 @@ npm install ../earlyaccess_tokensys
 
 ## Database Setup
 
-Run the database migration to create the required tables:
+Run the complete database migration to create the required tables with all features:
 
-```sql
--- Run this in your Supabase SQL editor
-CREATE TABLE early_access_tokens (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  token_code VARCHAR(64) UNIQUE NOT NULL,
-  created_by UUID REFERENCES auth.users(id),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  redeemed_by UUID REFERENCES auth.users(id),
-  redeemed_at TIMESTAMP WITH TIME ZONE,
-  expires_at TIMESTAMP WITH TIME ZONE,
-  is_active BOOLEAN DEFAULT TRUE,
-  metadata JSONB
-);
+**📁 Use the complete schema file:** `src/db/schema.sql`
 
-CREATE INDEX idx_early_access_tokens_code ON early_access_tokens(token_code);
-CREATE INDEX idx_early_access_tokens_redeemed_by ON early_access_tokens(redeemed_by);
-```
+This file includes:
+- ✅ Full table structure with shared token support
+- ✅ Performance indexes for all query patterns
+- ✅ Row Level Security (RLS) policies
+- ✅ Documentation comments
+
+**To set up the database:**
+1. Open your Supabase SQL editor
+2. Run the contents of `src/db/schema.sql`
+3. Verify the table and indexes are created
 
 ## Token Types
 
