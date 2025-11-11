@@ -58,6 +58,7 @@ export interface SharedTokenGenerationOptions extends TokenGenerationOptions {
 export interface TokenAnalytics {
   total_created: number;
   total_redeemed: number;
+  total_available: number;
   total_active: number;
   total_expired: number;
   redemption_rate: number;
