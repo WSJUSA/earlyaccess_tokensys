@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint src/**/*.ts tests/**/*.ts",
     "type-check": "tsc --noEmit"
   },
   "keywords": [

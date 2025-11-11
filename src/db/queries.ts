@@ -218,6 +218,7 @@ export class TokenDatabase {
     return {
       total_created,
       total_redeemed,
+      total_available,
       total_active,
       total_expired,
       redemption_rate: total_created > 0 ? total_redeemed / total_created : 0,

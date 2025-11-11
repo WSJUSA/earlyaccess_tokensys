@@ -1,3 +1,5 @@
+/// <reference types="@types/jest" />
+
 import {
   generateTokenCode,
   isValidTokenFormat,

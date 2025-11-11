@@ -2,7 +2,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
   plugins: ['@typescript-eslint'],
   parserOptions: {
@@ -21,7 +21,14 @@ module.exports = {
   env: {
     node: true,
     es6: true,
-    jest: true,
   },
+  overrides: [
+    {
+      files: ['tests/**/*.ts'],
+      env: {
+        jest: true,
+      },
+    },
+  ],
   ignorePatterns: ['dist/', 'node_modules/', 'coverage/'],
 };
