@@ -18,7 +18,7 @@
   "author": "William James",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.49.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

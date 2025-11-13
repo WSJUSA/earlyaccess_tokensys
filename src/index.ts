@@ -36,6 +36,3 @@ export type {
 
 // Database (for advanced usage)
 export { TokenDatabase } from './db/queries';
-
-// Re-export Supabase types for convenience
-export type { SupabaseClient } from '@supabase/supabase-js';

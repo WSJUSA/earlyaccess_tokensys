@@ -1,4 +1,5 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+// Using any to avoid version conflicts between library and consumer Supabase versions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { TokenDatabase } from '../db/queries';
 import { generateTokenBatch, isValidTokenFormat } from '../utils/tokenGenerator';
 import {
@@ -14,7 +15,7 @@ import {
 export class TokenService {
   private db: TokenDatabase;
 
-  constructor(supabaseClient: SupabaseClient) {
+  constructor(supabaseClient: any) {
     this.db = new TokenDatabase(supabaseClient);
   }
 
@@ -136,6 +137,6 @@ export class TokenService {
 }
 
 // Factory function for easier usage
-export function createTokenService(supabaseClient: SupabaseClient): TokenService {
+export function createTokenService(supabaseClient: any): TokenService {
   return new TokenService(supabaseClient);
 }

@@ -1,4 +1,5 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+// Using any to avoid version conflicts between library and consumer Supabase versions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { createTokenService } from './tokenService';
 
 // Rate limiting store (in production, use Redis or similar)
@@ -54,7 +55,7 @@ export function cleanupRateLimitStore(): void {
  * Express.js/Next.js API route handler for token validation
  * Usage in Next.js: /api/early-access/validate/route.ts
  */
-export async function createValidationHandler(supabaseClient: SupabaseClient) {
+export async function createValidationHandler(supabaseClient: any) {
   const tokenService = createTokenService(supabaseClient);
 
   return async function validateTokenHandler(
