@@ -32,9 +32,9 @@ CREATE INDEX IF NOT EXISTS idx_early_access_tokens_redeemed_users ON early_acces
 -- Add RLS (Row Level Security) policies
 ALTER TABLE early_access_tokens ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow token validation for active tokens (authenticated users)
+-- Policy: Allow token validation for active tokens (public access for early access)
 CREATE POLICY "Allow token validation" ON early_access_tokens
-  FOR SELECT USING (auth.role() = 'authenticated' AND is_active = true);
+  FOR SELECT USING (is_active = true);
 
 -- Policy: Users can view tokens they created, redeemed, or are in the redeemed_users array
 CREATE POLICY "Users can view their own tokens" ON early_access_tokens
@@ -56,13 +56,14 @@ CREATE POLICY "Service role can manage all tokens" ON early_access_tokens
 CREATE POLICY "Service role can create tokens" ON early_access_tokens
   FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
--- Policy: Users can update tokens for redemption if they haven't already redeemed it
+-- Policy: Users can update tokens for redemption
 CREATE POLICY "Users can update tokens for redemption" ON early_access_tokens
   FOR UPDATE USING (
     auth.uid() = created_by OR
-    (is_active = true AND
-     current_redemptions < max_redemptions AND
-     (auth.uid() != ALL(redeemed_users)))
+    (is_active = true AND current_redemptions < max_redemptions)
+  )
+  WITH CHECK (
+    auth.uid() = created_by OR is_active = true
   );
 
 -- RPC function for getting token analytics (admin operations)
@@ -138,6 +139,15 @@ BEGIN
   RETURN COALESCE(result, '[]'::jsonb);
 END;
 $$;
+
+-- Grant permissions for service role (additional security)
+GRANT ALL ON early_access_tokens TO service_role;
+GRANT USAGE ON SCHEMA public TO service_role;
+
+-- Grant permissions for anonymous access (required for RLS policies to work)
+GRANT SELECT ON early_access_tokens TO anon;
+-- Grant SELECT + UPDATE for authenticated users (RLS policies provide fine-grained control)
+GRANT SELECT, UPDATE ON early_access_tokens TO authenticated;
 
 -- Comments for documentation
 COMMENT ON TABLE early_access_tokens IS 'Stores early access tokens for controlled beta access - supports both single-use and shared codes';
