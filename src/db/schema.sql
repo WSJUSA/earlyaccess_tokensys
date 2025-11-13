@@ -44,9 +44,17 @@ CREATE POLICY "Users can view their own tokens" ON early_access_tokens
     (auth.uid() = ANY(redeemed_users))
   );
 
--- Policy: Only authenticated users can insert tokens (for admin creation)
+-- Policy: Authenticated users can insert tokens (for admin creation)
 CREATE POLICY "Authenticated users can create tokens" ON early_access_tokens
   FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Policy: Service role can perform all operations (for admin backend operations)
+CREATE POLICY "Service role can manage all tokens" ON early_access_tokens
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- Policy: Service role can insert tokens (for admin token generation)
+CREATE POLICY "Service role can create tokens" ON early_access_tokens
+  FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
 -- Policy: Users can update tokens for redemption if they haven't already redeemed it
 CREATE POLICY "Users can update tokens for redemption" ON early_access_tokens
