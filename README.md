@@ -2,14 +2,22 @@
 
 A modular early access token system for TypeScript web applications. This system provides controlled access to beta features, private content, or limited releases through unique token codes. It is designed for use with a Supabase database.
 
+![Token Input Component](./assets/screenshots/earlyaccess_input_sample.png)
+
+*Generate and hand out tokens to provide limited early access to users to your new project or to allow access to new features.*
+
 ## Features
 
 - **Secure Token Generation**: Cryptographically secure token generation with collision resistance
 - **Vanity Token Naming**: Custom prefixes for branded, memorable token codes
 - **Database-Backed**: Full audit trail of token creation, distribution, and redemption
-- **Admin Management**: Simple interface for token generation and management
+- **Admin Management**: Sample interface for token generation and management you can use for implementation in your project
 - **Supabase Integration**: Seamless integration with existing Supabase authentication
 - **Extensible Design**: Built for future enhancements like expiration, usage limits, and revocation
+
+![Token Management Capabilities](./assets/screenshots/earlyaccess_generate_sample.png)
+
+*Supports advanced features including vanity prefixes, expiration dates, metadata support, detailed lifecycle information.*
 
 ## Installation
 
@@ -20,7 +28,7 @@ npm install ../earlyaccess_tokensys
 Or for monorepo development:
 ```bash
 npm install
-cd ../essayagent_webapp
+cd ../your_app
 npm install ../earlyaccess_tokensys
 ```
 
@@ -213,7 +221,7 @@ npm run type-check
 
 ## Quick Start
 
-1. **Install**: `npm install ../ts_tokensys`
+1. **Install**: `npm install ../earlyaccess-tokensys`
 2. **Setup Database**: Run the SQL in `src/db/schema.sql` in Supabase
 3. **Create API Routes**: See `SETUP.md` for complete integration guide
 4. **Update Signup**: Use `TokenInput` component in your signup flow

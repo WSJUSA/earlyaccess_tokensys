@@ -19,8 +19,13 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
   const [batchSize, setBatchSize] = useState(5);
   const [maxRedemptions, setMaxRedemptions] = useState(25);
   const [tokenType, setTokenType] = useState<'unique' | 'shared'>('shared');
-  const [filter, setFilter] = useState<'all' | 'active' | 'redeemed' | 'expired'>('all');
+  const [filter, setFilter] = useState<'all' | 'active' | 'redeemed' | 'expired' | 'inactive'>('all');
   const [exporting, setExporting] = useState(false);
+  const [customPrefix, setCustomPrefix] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
+  const [metadata, setMetadata] = useState('');
+  const [useSimpleFormat, setUseSimpleFormat] = useState(false);
+  const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
 
   // Fetch tokens and analytics
   const fetchData = useCallback(async () => {
@@ -56,15 +61,41 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
     try {
       setGenerating(true);
       const isShared = tokenType === 'shared';
+      const requestBody: any = {
+        count: batchSize,
+        tokenType,
+        simple_format: useSimpleFormat,
+      };
+
+      // Add custom prefix if provided
+      if (customPrefix.trim()) {
+        requestBody.custom_prefix = customPrefix.trim();
+      }
+
+      // Add max redemptions for shared tokens
+      if (isShared) {
+        requestBody.maxRedemptions = maxRedemptions;
+      }
+
+      // Add expiration if provided
+      if (expiresAt) {
+        requestBody.expires_at = new Date(expiresAt).toISOString();
+      }
+
+      // Add metadata if provided
+      if (metadata.trim()) {
+        try {
+          requestBody.metadata = JSON.parse(metadata);
+        } catch (error) {
+          // If JSON parsing fails, treat as string
+          requestBody.metadata = { description: metadata };
+        }
+      }
+
       const response = await fetch(`${supabaseUrl}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          count: batchSize,
-          shared_code: isShared,
-          max_redemptions: isShared ? maxRedemptions : 1,
-          simple_format: isShared
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) throw new Error('Failed to generate tokens');
@@ -81,6 +112,11 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
         total_created: newTotalCreated,
         total_active: newTotalActive
       } : null);
+
+      // Reset form after successful generation
+      setExpiresAt('');
+      setMetadata('');
+      setCustomPrefix('');
 
       // Refresh data
       fetchData();
@@ -156,6 +192,18 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
     }
   };
 
+  const toggleTokenExpanded = (tokenId: string) => {
+    setExpandedTokens(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tokenId)) {
+        newSet.delete(tokenId);
+      } else {
+        newSet.add(tokenId);
+      }
+      return newSet;
+    });
+  };
+
   if (loading && tokens.length === 0) {
     return <div className="token-admin-loading">Loading token data...</div>;
   }
@@ -189,6 +237,7 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
 
       {/* Controls */}
       <div className="token-controls">
+        {/* Basic Options */}
         <div className="control-group">
           <label>
             Token Type:
@@ -200,6 +249,18 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
               <option value="shared">Shared Codes (Multiple Users)</option>
               <option value="unique">Unique Codes (One User Each)</option>
             </select>
+          </label>
+
+          <label>
+            Number of Codes:
+            <input
+              type="number"
+              min="1"
+              max="50"
+              value={batchSize}
+              onChange={(e) => setBatchSize(parseInt(e.target.value) || 1)}
+              className="batch-size-input"
+            />
           </label>
 
           {tokenType === 'shared' && (
@@ -215,25 +276,62 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
               />
             </label>
           )}
+        </div>
+
+        {/* Advanced Options */}
+        <div className="control-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={useSimpleFormat}
+              onChange={(e) => setUseSimpleFormat(e.target.checked)}
+            />
+            Use simple format (BETA2025 instead of EA-XXXX-XXXX)
+          </label>
+
+          {useSimpleFormat && (
+            <label>
+              Custom Prefix (Optional):
+              <input
+                type="text"
+                value={customPrefix}
+                onChange={(e) => setCustomPrefix(e.target.value)}
+                placeholder="e.g., VIP, LAUNCH2025"
+                className="custom-prefix-input"
+                maxLength={20}
+              />
+            </label>
+          )}
 
           <label>
-            Number of Codes:
+            Expiration Date (Optional):
             <input
-              type="number"
-              min="1"
-              max="50"
-              value={batchSize}
-              onChange={(e) => setBatchSize(parseInt(e.target.value) || 1)}
-              className="batch-size-input"
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              className="expiration-input"
             />
           </label>
 
+          <label>
+            Metadata (JSON, Optional):
+            <textarea
+              value={metadata}
+              onChange={(e) => setMetadata(e.target.value)}
+              placeholder='{"campaign": "beta_launch"}'
+              rows={2}
+              className="metadata-input"
+            />
+          </label>
+        </div>
+
+        <div className="control-group">
           <button
             onClick={handleGenerateTokens}
             disabled={generating}
             className="generate-button"
           >
-            {generating ? 'Generating...' : `Generate ${batchSize} ${tokenType === 'shared' ? 'Shared' : 'Unique'} Code${batchSize > 1 ? 's' : ''}`}
+            {generating ? 'Generating...' : `Generate ${batchSize} ${tokenType === 'shared' ? 'Shared' : 'Unique'} Code${batchSize > 1 ? 's' : ''}${customPrefix ? ` (${customPrefix.toUpperCase()})` : ''}`}
           </button>
         </div>
 
@@ -245,6 +343,7 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
               <option value="active">Active Only</option>
               <option value="redeemed">Redeemed Only</option>
               <option value="expired">Expired Only</option>
+              <option value="inactive">Inactive Only</option>
             </select>
           </label>
           <button
@@ -266,43 +365,135 @@ export const TokenAdmin: React.FC<TokenAdminProps> = ({
           <div className="token-grid">
             {tokens.map((token) => (
               <div key={token.id} className="token-card">
-                <div className="token-code">{token.token_code}</div>
-                <div className="token-meta">
-                  <span
-                    className="token-status"
-                    style={{ color: getStatusColor(token) }}
-                  >
-                    {getTokenStatus(token)}
-                  </span>
+                <div className="token-header">
+                  <div className="token-code">{token.token_code}</div>
+                  <div className="token-actions">
+                    <button
+                      onClick={() => toggleTokenExpanded(token.id)}
+                      className="expand-button"
+                    >
+                      {expandedTokens.has(token.id) ? '▼' : '▶'}
+                    </button>
+                    <span
+                      className="token-status"
+                      style={{ color: getStatusColor(token) }}
+                    >
+                      {getTokenStatus(token)}
+                    </span>
+                  </div>
+                </div>
 
-                  {/* Show usage for shared codes */}
+                <div className="token-summary">
+                  <span className="token-type">
+                    {token.max_redemptions === 1 ? 'Unique' : `Shared (${token.max_redemptions} users)`}
+                  </span>
                   {token.max_redemptions > 1 && (
                     <span className="token-usage">
                       Used: {token.current_redemptions}/{token.max_redemptions} ({Math.round((token.current_redemptions / token.max_redemptions) * 100)}%)
                     </span>
                   )}
-
                   <span className="token-date">
                     Created: {new Date(token.created_at).toLocaleDateString()}
                   </span>
-
-                  {/* Show redemption info */}
-                  {token.max_redemptions === 1 && token.redeemed_at && (
-                    <span className="token-date">
-                      Redeemed: {new Date(token.redeemed_at).toLocaleDateString()}
-                    </span>
-                  )}
-                  {token.max_redemptions > 1 && token.current_redemptions > 0 && (
-                    <span className="token-date">
-                      First redeemed: {new Date(token.redeemed_at || token.created_at).toLocaleDateString()}
-                    </span>
-                  )}
-
-                  {/* Show format type */}
-                  <span className="token-format">
-                    Type: {token.max_redemptions === 1 ? 'Unique' : `Shared (${token.max_redemptions} users)`}
-                  </span>
                 </div>
+
+                {expandedTokens.has(token.id) && (
+                  <div className="token-details">
+                    {/* Usage Statistics */}
+                    <div className="details-section">
+                      <h4>Usage Statistics</h4>
+                      <div className="stats-grid">
+                        <div className="stat-item">
+                          <span className="stat-label">Type:</span>
+                          <span className="stat-value">{token.max_redemptions > 1 ? 'Shared' : 'Unique'}</span>
+                        </div>
+                        <div className="stat-item">
+                          <span className="stat-label">Max Allowed:</span>
+                          <span className="stat-value">{token.max_redemptions}</span>
+                        </div>
+                        <div className="stat-item">
+                          <span className="stat-label">Redeemed:</span>
+                          <span className="stat-value">{token.current_redemptions}</span>
+                        </div>
+                        <div className="stat-item">
+                          <span className="stat-label">Remaining:</span>
+                          <span className="stat-value">{token.max_redemptions - token.current_redemptions}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Timeline */}
+                    <div className="details-section">
+                      <h4>Timeline</h4>
+                      <div className="timeline-grid">
+                        {token.created_by && (
+                          <div className="timeline-item">
+                            <span className="timeline-label">Created By:</span>
+                            <span className="timeline-value">{token.created_by}</span>
+                          </div>
+                        )}
+
+                        <div className="timeline-item">
+                          <span className="timeline-label">Created:</span>
+                          <span className="timeline-value">{new Date(token.created_at).toLocaleString()}</span>
+                        </div>
+
+                        {token.redeemed_at ? (
+                          <>
+                            <div className="timeline-item">
+                              <span className="timeline-label">Redeemed:</span>
+                              <span className="timeline-value">{new Date(token.redeemed_at).toLocaleString()}</span>
+                            </div>
+                            {token.redeemed_by && (
+                              <div className="timeline-item">
+                                <span className="timeline-label">Redeemed By:</span>
+                                <span className="timeline-value">{token.redeemed_by}</span>
+                              </div>
+                            )}
+                          </>
+                        ) : token.expires_at && new Date(token.expires_at) < new Date() ? (
+                          <div className="timeline-item">
+                            <span className="timeline-label">Expired:</span>
+                            <span className="timeline-value">{new Date(token.expires_at).toLocaleString()}</span>
+                          </div>
+                        ) : (
+                          <div className="timeline-item">
+                            <span className="timeline-label">Status:</span>
+                            <span className="timeline-value">{token.is_active ? 'Available for redemption' : 'Inactive'}</span>
+                          </div>
+                        )}
+
+                        {token.expires_at && new Date(token.expires_at) > new Date() && (
+                          <div className="timeline-item">
+                            <span className="timeline-label">Expires:</span>
+                            <span className="timeline-value">{new Date(token.expires_at).toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Metadata */}
+                    {token.metadata && Object.keys(token.metadata).length > 0 && (
+                      <div className="details-section">
+                        <h4>Metadata</h4>
+                        <div className="metadata-display">
+                          {(() => {
+                            try {
+                              if (typeof token.metadata === 'string') {
+                                const parsed = JSON.parse(token.metadata);
+                                return JSON.stringify(parsed, null, 2);
+                              } else {
+                                return JSON.stringify(token.metadata, null, 2);
+                              }
+                            } catch {
+                              return String(token.metadata);
+                            }
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
