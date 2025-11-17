@@ -1,9 +1,14 @@
 {
   "name": "earlyaccess-tokensys",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A flexible early access token system for web applications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "jest",
